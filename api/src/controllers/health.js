@@ -32,6 +32,28 @@ const queues = {
 	'Personalisation-sync Queue': streamQueue,
 };
 
+const queueTTL = 24 * 60 * 60 * 1000; // 1 day
+
+const queueCompletedCleanup = async (queue) => {
+	await queue.clean(queueTTL, 'completed'); // cleans all jobs that completed over 1 day ago.
+};
+
+const queueFailedCleanup = async (queue) => {
+	await queue.clean(queueTTL, 'failed'); // clean all jobs that failed over 1 day ago
+};
+
+queueCompletedCleanup(rssQueue);
+queueCompletedCleanup(ogQueue);
+queueCompletedCleanup(podcastQueue);
+queueCompletedCleanup(socialQueue);
+queueCompletedCleanup(streamQueue);
+
+queueFailedCleanup(rssQueue);
+queueFailedCleanup(ogQueue);
+queueFailedCleanup(podcastQueue);
+queueFailedCleanup(socialQueue);
+queueFailedCleanup(streamQueue);
+
 exports.health = async (req, res) => {
 	res.status(200).send({ version, healthy: '100%' });
 };
@@ -76,16 +98,12 @@ exports.status = async (req, res) => {
 
 	if (output.rss.parsing > 2000) {
 		output.code = 500;
-		output.error = `There are too many RSS feeds currently parsing ${
-			output.rssCurrentlyParsing
-		}`;
+		output.error = `There are too many RSS feeds currently parsing ${output.rssCurrentlyParsing}`;
 	}
 
 	if (output.podcast.parsing > 500) {
 		output.code = 500;
-		output.error = `There are too many Podcast feeds currently parsing ${
-			output.podcastCurrentlyParsing
-		}`;
+		output.error = `There are too many Podcast feeds currently parsing ${output.podcastCurrentlyParsing}`;
 	}
 
 	res.status(output.code).json(output);
@@ -99,9 +117,7 @@ exports.queue = async (req, res) => {
 		output[key] = queueStatus;
 		if (queueStatus.waiting > 2500) {
 			output.code = 500;
-			output.error = `Queue ${key} has more than 2500 items waiting to be processed: ${
-				queueStatus.waiting
-			} are waiting`;
+			output.error = `Queue ${key} has more than 2500 items waiting to be processed: ${queueStatus.waiting} are waiting`;
 		}
 	}
 
@@ -134,32 +150,41 @@ exports.sentryLog = async (req, res) => {
 	res.status(200).send('{}');
 };
 
-exports.bullArena = Arena({
-	queues: [
-		{
-			hostId: 'local',
-			name: 'rss',
-			url: config.cache.uri,
-		},
-		{
-			hostId: 'local',
-			name: 'podcast',
-			url: config.cache.uri,
-		},
-		{
-			hostId: 'local',
-			name: 'og',
-			url: config.cache.uri,
-		},
-		{
-			hostId: 'local',
-			name: 'social',
-			url: config.cache.uri,
-		},
-		{
-			hostId: 'local',
-			name: 'stream',
-			url: config.cache.uri,
-		},
-	],
-});
+exports.bullArena = Arena(
+	{
+		Bull: Queue,
+		queues: [
+			{
+				type: 'bull',
+				hostId: 'local',
+				name: 'rss',
+				url: config.cache.uri,
+			},
+			{
+				type: 'bull',
+				hostId: 'local',
+				name: 'podcast',
+				url: config.cache.uri,
+			},
+			{
+				type: 'bull',
+				hostId: 'local',
+				name: 'og',
+				url: config.cache.uri,
+			},
+			{
+				type: 'bull',
+				hostId: 'local',
+				name: 'social',
+				url: config.cache.uri,
+			},
+			{
+				type: 'bull',
+				hostId: 'local',
+				name: 'stream',
+				url: config.cache.uri,
+			},
+		],
+	},
+	{ disableListen: true },
+);

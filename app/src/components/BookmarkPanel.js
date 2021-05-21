@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import Img from 'react-image';
+import { Img } from 'react-image';
 import { connect } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
 
@@ -41,13 +41,11 @@ class BookmarkPanel extends React.Component {
 								to={
 									folderView
 										? `/folders/${
-											foldersFeed[bookmark.article.rss._id]
+												foldersFeed[bookmark.article.rss._id]
 										  }/r/${bookmark.article.rss._id}/a/${
-											bookmark.article._id
+												bookmark.article._id
 										  }`
-										: `/rss/${bookmark.article.rss._id}/articles/${
-											bookmark.article._id
-										  }`
+										: `/rss/${bookmark.article.rss._id}/articles/${bookmark.article._id}`
 								}
 							>
 								<Img
@@ -72,13 +70,11 @@ class BookmarkPanel extends React.Component {
 								to={
 									folderView
 										? `/folders/${
-											foldersFeed[bookmark.episode.podcast._id]
+												foldersFeed[bookmark.episode.podcast._id]
 										  }/p/${bookmark.episode.podcast._id}/e/${
-											bookmark.episode._id
+												bookmark.episode._id
 										  }`
-										: `/podcasts/${
-											bookmark.episode.podcast._id
-										  }/episodes/${bookmark.episode._id}`
+										: `/podcasts/${bookmark.episode.podcast._id}/episodes/${bookmark.episode._id}`
 								}
 							>
 								<Img

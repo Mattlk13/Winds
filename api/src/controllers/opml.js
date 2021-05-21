@@ -13,6 +13,7 @@ import Follow from '../models/follow';
 import User from '../models/user';
 
 import config from '../config';
+import { isBlockedURLs } from '../utils/blockedURLs';
 import * as rateLimit from '../utils/rate-limiter';
 import { RssQueueAdd, PodcastQueueAdd } from '../asyncTasks';
 import { IsPodcastURL } from '../parsers/detect-type';
@@ -122,10 +123,10 @@ async function getOrCreateManyPublications(feeds) {
 	}
 
 	const newInstanceData = newPublications.map((p) => {
-		const title = entities.decodeHTML(p.feed.title);
+		const title = entities.decodeHTML(p.feed.title) || '';
 		return {
 			categories: p.publicationType,
-			description: title,
+			description: title.substring(0, 240),
 			favicon: p.feed.favicon,
 			feedUrl: p.url,
 			lastScraped: moment().subtract(12, 'hours'),
@@ -192,6 +193,9 @@ exports.post = async (req, res) => {
 	const feedIdentities = await Promise.all(
 		feeds.map(async (f) => {
 			try {
+				if (isBlockedURLs(feeds.feedUrl)) {
+					return { feedUrl: f.feedUrl, error: "this feed can't be added" };
+				}
 				return { result: await identifyFeedType(f) };
 			} catch (err) {
 				return { feedUrl: f.feedUrl, error: err.message };

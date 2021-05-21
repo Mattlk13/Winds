@@ -22,6 +22,7 @@ import { getStreamClient } from '../utils/stream';
 import { startSampling } from '../utils/watchdog';
 import { ensureEncoded } from '../utils/urls';
 import { getStatsDClient, timeIt } from '../utils/statsd';
+import { isBlockedURLs } from '../utils/blockedURLs';
 import { tryCreateQueueFlag, removeFromQueueFlagSet } from '../utils/queue';
 
 if (require.main === module) {
@@ -43,6 +44,12 @@ function sleep(time) {
 
 export async function podcastProcessor(job) {
 	logger.info(`Processing ${job.data.url}`);
+
+	if (isBlockedURLs(job.data.url)) {
+		logger.info(`${job.data.url} is in block list and ignored.`);
+		return;
+	}
+
 	try {
 		await handlePodcast(job);
 	} catch (err) {
@@ -129,9 +136,7 @@ export async function handlePodcast(job) {
 
 	if (podcast.duplicateOf) {
 		logger.warn(
-			`Podcast with ID ${podcastID} is a duplicate of ${
-				podcast.duplicateOf
-			}. Skipping`,
+			`Podcast with ID ${podcastID} is a duplicate of ${podcast.duplicateOf}. Skipping`,
 		);
 		statsd.increment('winds.handle_podcast.result.model_instance_duplicate');
 		return;
@@ -206,9 +211,7 @@ export async function handlePodcast(job) {
 	const operationMap = await upsertManyPosts(podcastID, episodes, 'podcast');
 	const updatedEpisodes = operationMap.new.concat(operationMap.changed);
 	logger.info(
-		`Finished updating ${updatedEpisodes.length} out of ${
-			podcastContent.episodes.length
-		} changed`,
+		`Finished updating ${updatedEpisodes.length} out of ${podcastContent.episodes.length} changed`,
 	);
 
 	await Podcast.update(

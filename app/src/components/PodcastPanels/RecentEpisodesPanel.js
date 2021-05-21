@@ -1,5 +1,5 @@
 import getPlaceholderImageURL from '../../util/getPlaceholderImageURL';
-import Img from 'react-image';
+import { Img } from 'react-image';
 import React from 'react';
 import Panel from '../Panel';
 import { Link } from 'react-router-dom';
@@ -19,9 +19,7 @@ class RecentEpisodesPanel extends React.Component {
 					return (
 						<Link
 							key={episode._id}
-							to={`/podcasts/${episode.podcast._id}/episodes/${
-								episode._id
-							}`}
+							to={`/podcasts/${episode.podcast._id}/episodes/${episode._id}`}
 						>
 							<Img
 								loader={<div className="placeholder" />}

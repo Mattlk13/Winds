@@ -67,9 +67,7 @@ export function ComputeHash(post) {
 	const enclosureString = enclosureUrls.join(',') || '';
 	//XXX: ignore post.content for now, it changes too often
 	const data = `${post.title}:${post.description}:${post.link}:${enclosureString}`;
-	return createHash('md5')
-		.update(data)
-		.digest('hex');
+	return createHash('md5').update(data).digest('hex');
 }
 
 export function ComputePublicationHash(posts, limit = 20) {
@@ -81,9 +79,7 @@ export function ComputePublicationHash(posts, limit = 20) {
 		throw Error('Missing post fingerprints');
 	}
 	const data = fingerprints.join(',');
-	return createHash('md5')
-		.update(data)
-		.digest('hex');
+	return createHash('md5').update(data).digest('hex');
 }
 
 export function CreateFingerPrints(posts, guidStability) {
@@ -128,8 +124,9 @@ export function CreateFingerPrints(posts, guidStability) {
 
 	// compute the post fingerprints
 	for (let p of posts) {
-		p.fingerprint = `${strategy}:${p[strategy] &&
-			p[strategy].slice(0, 254 - strategy.length)}`;
+		p.fingerprint = `${strategy}:${
+			p[strategy] && p[strategy].slice(0, 254 - strategy.length)
+		}`;
 	}
 
 	// next compute the publication fingerprint
@@ -173,11 +170,9 @@ export function ParsePodcastPosts(domain, posts, guidStability, limit = 1000) {
 		// ensure we keep order for feeds with no time
 		const time =
 			moment(post.pubdate).toISOString() ||
-			moment()
-				.subtract(i, 'minutes')
-				.toISOString();
+			moment().subtract(i, 'minutes').toISOString();
 		let episode = new Episode({
-			description: strip(post.description).substring(0, 280),
+			description: (strip(post.description) || '').substring(0, 240),
 			duration: post.duration,
 			guid: post.guid,
 			link: post.link,
@@ -243,10 +238,7 @@ function checkHeaders(stream, url, checkContenType = false) {
 					const contentType = response.headers['content-type'];
 					if (
 						!contentType ||
-						!contentType
-							.trim()
-							.toLowerCase()
-							.includes('html')
+						!contentType.trim().toLowerCase().includes('html')
 					) {
 						logger.warn(
 							`Invalid content type '${contentType}' for url ${url}`,
@@ -421,13 +413,11 @@ export function ParseFeedPosts(domain, posts, guidStability, limit = 1000) {
 			// ensure we keep order for feeds with no time
 			const time =
 				moment(post.pubdate).toISOString() ||
-				moment()
-					.subtract(i, 'minutes')
-					.toISOString();
+				moment().subtract(i, 'minutes').toISOString();
 			const content = sanitize(post.summary);
 			article = new Article({
 				content: content,
-				description: description,
+				description: (description || '').substring(0, 240),
 				enclosures: post.enclosures,
 				fingerprint: post.fingerprint,
 				guid: post.guid,

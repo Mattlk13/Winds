@@ -3,7 +3,7 @@ import algoliaLogo from '../images/logos/powered-by-algolia.svg';
 import { Link, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Algolia from 'algoliasearch';
-import Img from 'react-image';
+import { Img } from 'react-image';
 import PropTypes from 'prop-types';
 import React from 'react';
 import getPlaceholderImageURL from '../util/getPlaceholderImageURL';
@@ -15,30 +15,30 @@ const index = client.initIndex(config.algolia.index);
 
 const getResourceUrl = (resource) => {
 	switch (resource.type) {
-	case 'folder':
-		return `/folders/${resource._id}`;
-	case 'article':
-		return `/rss/${resource.rss}/articles/${resource._id}`;
-	case 'episode':
-		return `/podcasts/${resource.podcast}`;
-	case 'rss':
-		return `/rss/${resource.duplicateOf || resource._id}`;
-	case 'podcast':
-		return `/podcasts/${resource._id}`;
-	case 'tag':
-		return `/tags/${resource._id}`;
-	default:
-		console.log(resource); // eslint-disable-line no-console
+		case 'folder':
+			return `/folders/${resource._id}`;
+		case 'article':
+			return `/rss/${resource.rss}/articles/${resource._id}`;
+		case 'episode':
+			return `/podcasts/${resource.podcast}`;
+		case 'rss':
+			return `/rss/${resource.duplicateOf || resource._id}`;
+		case 'podcast':
+			return `/podcasts/${resource._id}`;
+		case 'tag':
+			return `/tags/${resource._id}`;
+		default:
+			console.log(resource); // eslint-disable-line no-console
 	}
 };
 
 const getResourceTitle = (resource) => {
 	switch (resource.type) {
-	case 'folder':
-	case 'tag':
-		return resource.name;
-	default:
-		return resource.title;
+		case 'folder':
+		case 'tag':
+			return resource.name;
+		default:
+			return resource.title;
 	}
 };
 

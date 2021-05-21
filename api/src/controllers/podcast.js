@@ -4,6 +4,7 @@ import normalizeUrl from 'normalize-url';
 import Podcast from '../models/podcast';
 
 import { isURL } from '../utils/validation';
+import { isBlockedURLs } from '../utils/blockedURLs';
 import { discoverRSS } from '../parsers/discovery';
 import { getPodcastRecommendations } from '../utils/personalization';
 import { ParsePodcast } from '../parsers/feed';
@@ -57,6 +58,10 @@ exports.post = async (req, res) => {
 		return res.status(400).json({ error: 'Please provide a valid podcast URL.' });
 	}
 
+	if (isBlockedURLs(data.feedUrl)) {
+		return res.status(400).json({ error: 'This podcast can not be added.' });
+	}
+
 	let foundPodcasts = await discoverRSS(normalizeUrl(data.feedUrl));
 	if (!foundPodcasts.feedUrls.length) {
 		return res.status(404).json({ error: `Can't find any podcasts.` });
@@ -97,7 +102,7 @@ exports.post = async (req, res) => {
 				{ feedUrl: feedUrl },
 				{
 					categories: 'podcast',
-					description: description,
+					description: (description || '').substring(0, 240),
 					feedUrl: feedUrl,
 					images: images,
 					lastScraped: new Date(0),

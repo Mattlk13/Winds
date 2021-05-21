@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Algolia from 'algoliasearch';
-import Img from 'react-image';
+import { Img } from 'react-image';
 import { connect } from 'react-redux';
 
 import config from '../../config';
@@ -108,8 +108,9 @@ class SearchFeed extends React.Component {
 							{this.state.results.length ? (
 								this.state.results.map((result, i) => (
 									<div
-										className={`panel-element ${this.state
-											.selectedIndex === i && 'selected'}`}
+										className={`panel-element ${
+											this.state.selectedIndex === i && 'selected'
+										}`}
 										key={result._id}
 										onClick={() => {
 											this.props.addFeed(result);
